@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Bilang Champs — Counting Adventure (Grade 1-3) | Project KABULIG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#081326;
+    --navy-800:#0E2143;
+    --navy-700:#15315C;
+    --navy-500:#27466F;
+    --navy-100:#C9D5E8;
+    --gold-500:#E3A83B;
+    --gold-300:#F4D58D;
+    --cream:#FFF8EC;
+    --green:#3FAE7E;
+    --blue:#3A98C9;
+    --coral:#E8714A;
+    --ink:#1B2A41;
+    --white:#FFFFFF;
+    --radius:22px;
+    --shadow: 0 14px 32px rgba(0,0,0,0.32);
+    --shadow-sm: 0 6px 14px rgba(0,0,0,0.22);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:
+      radial-gradient(2px 2px at 8% 12%, rgba(244,213,141,0.9), transparent),
+      radial-gradient(2px 2px at 22% 32%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1.5px 1.5px at 38% 8%, rgba(244,213,141,0.7), transparent),
+      radial-gradient(2px 2px at 55% 22%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1.5px 1.5px at 72% 14%, rgba(244,213,141,0.8), transparent),
+      radial-gradient(2px 2px at 88% 28%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1.5px 1.5px at 14% 70%, rgba(244,213,141,0.6), transparent),
+      radial-gradient(2px 2px at 32% 88%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 64% 78%, rgba(244,213,141,0.6), transparent),
+      radial-gradient(2px 2px at 92% 68%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(circle at 18% 20%, rgba(227,168,59,0.20), transparent 38%),
+      radial-gradient(circle at 85% 80%, rgba(244,213,141,0.14), transparent 45%),
+      linear-gradient(165deg, var(--navy-900) 0%, var(--navy-800) 55%, var(--navy-700) 100%);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  h1,h2,h3{font-family:'Outfit',sans-serif;margin:0;}
+  button{font-family:'Nunito',sans-serif;cursor:pointer;border:none;}
+  button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:3px solid var(--blue); outline-offset:2px;
+  }
+  .wrap{max-width:760px;margin:0 auto;width:100%;padding:62px 18px 90px;flex:1;display:flex;flex-direction:column;}
+  .brandbar{
+    position:fixed;top:0;left:0;right:0;z-index:40;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;background:rgba(8,19,38,0.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(244,213,141,0.18);
+  }
+  .brandbar-inner{max-width:760px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:8px;font-family:'Outfit',sans-serif;font-weight:800;color:var(--white);font-size:14px;letter-spacing:.3px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--gold-500);display:inline-block;}
+  .control-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+  .pill-toggle{display:flex;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(244,213,141,0.25);border-radius:999px;padding:4px;}
+  .pill-toggle button{font-size:12px;font-weight:800;padding:7px 13px;border-radius:999px;background:transparent;color:var(--navy-100);}
+  .pill-toggle button.active{background:var(--gold-500);color:var(--navy-900);}
+  .pill-toggle-light{display:inline-flex;gap:6px;background:var(--cream);border:1px solid #E3DCC9;border-radius:999px;padding:4px;margin-bottom:14px;}
+  .pill-toggle-light button{font-size:12px;font-weight:800;padding:7px 13px;border-radius:999px;background:transparent;color:var(--navy-700);}
+  .pill-toggle-light button.active{background:var(--navy-900);color:var(--white);}
+
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* ---------- SETUP ---------- */
+  .hero{text-align:center;margin-bottom:14px;}
+  .hero h1{font-size:44px;color:var(--white);line-height:1.1;letter-spacing:-0.5px;}
+  .hero h1 span{color:var(--gold-500);}
+  .hero p{margin-top:6px;color:var(--gold-300);font-weight:700;font-size:14px;}
+  .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-weight:800;font-size:13px;color:var(--navy-700);margin-bottom:6px;}
+  .field input, .field select{
+    width:100%;padding:12px 14px;border-radius:14px;border:2px solid #E3DCC9;
+    font-size:16px;font-weight:700;color:var(--ink);background:var(--cream);font-family:'Nunito',sans-serif;
+  }
+  .grade-row{display:flex;gap:10px;margin-bottom:14px;}
+  .grade-pill{flex:1;padding:14px 8px;border-radius:16px;text-align:center;font-weight:800;font-size:13px;border:2px solid #E3DCC9;background:var(--cream);color:var(--navy-700);}
+  .grade-pill.locked{opacity:.55;}
+  .grade-pill.selected{background:var(--navy-900);color:var(--white);border-color:var(--navy-900);}
+  .grade-pill small{display:block;font-weight:700;font-size:11px;margin-top:3px;opacity:.85;}
+  .howto-card{background:var(--cream);border-radius:16px;padding:14px 16px;border:2px solid #E3DCC9;}
+  .howto-row{display:flex;align-items:flex-start;gap:10px;font-size:13px;font-weight:700;color:var(--navy-700);margin-bottom:10px;line-height:1.4;}
+  .howto-row:last-child{margin-bottom:0;}
+  .howto-num{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--navy-900);color:var(--white);
+    font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .howto-pass{color:var(--navy-900);background:var(--gold-300);padding:8px 10px;border-radius:10px;margin-top:4px;}
+  .btn-primary{
+    width:100%;padding:16px;border-radius:16px;background:var(--navy-900);color:var(--white);
+    font-weight:800;font-size:17px;box-shadow:var(--shadow-sm);transition:transform .12s ease;
+  }
+  .btn-primary:active{transform:scale(.98);}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;}
+  .hint{font-size:12px;color:#8a7f63;margin-top:10px;text-align:center;font-weight:700;}
+
+  /* ---------- GAME ---------- */
+  .game-header{display:flex;flex-direction:column;gap:10px;margin-bottom:8px;}
+  .round-label{display:flex;align-items:center;justify-content:space-between;}
+  .round-badge{font-family:'Outfit',sans-serif;font-weight:800;font-size:13px;color:var(--white);
+    background:var(--navy-900);padding:7px 14px;border-radius:999px;}
+  .score-badge{font-weight:800;font-size:13px;color:var(--navy-900);background:var(--gold-300);padding:7px 14px;border-radius:999px;}
+  .dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+  .dot-item{width:18px;height:18px;border-radius:50%;background:#E3DCC9;border:2px solid #E3DCC9;transition:.2s;}
+  .dot-item.correct{background:var(--green);border-color:var(--green);}
+  .dot-item.wrong{background:var(--coral);border-color:var(--coral);}
+  .dot-item.current{border-color:var(--navy-900);}
+
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:10px 0;}
+  .mascot{width:84px;height:84px;transition:transform .25s ease;filter:drop-shadow(0 0 14px rgba(244,213,141,0.45));}
+  .mascot.happy{animation:bounce .6s ease;}
+  @keyframes bounce{0%{transform:translateY(0) rotate(0)}30%{transform:translateY(-16px) rotate(-8deg)}60%{transform:translateY(0) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
+  .mascot.sad{animation:wiggle .5s ease;}
+  @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+
+  .question-card{background:var(--white);border-radius:28px;box-shadow:var(--shadow);padding:30px 26px;width:100%;max-width:480px;text-align:center;position:relative;}
+  .round-tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;
+    background:var(--gold-500);color:var(--navy-900);padding:5px 14px;border-radius:999px;letter-spacing:.4px;}
+  .number-display{font-family:'Outfit',sans-serif;font-weight:800;font-size:96px;color:var(--navy-900);line-height:1;margin:10px 0;}
+  .seq-display{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:14px 0;}
+  .seq-num{font-family:'Outfit',sans-serif;font-weight:800;font-size:34px;color:var(--navy-700);
+    background:var(--cream);border-radius:14px;padding:10px 16px;min-width:50px;}
+  .seq-num.blank{background:var(--navy-900);color:var(--gold-300);border:3px dashed var(--gold-500);}
+  .prompt-text{font-size:17px;font-weight:800;color:var(--navy-700);margin-bottom:4px;}
+
+  .choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .choice-btn{
+    min-width:74px;padding:16px 18px;border-radius:16px;background:var(--cream);border:3px solid #E3DCC9;
+    font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;color:var(--navy-900);transition:.15s;
+  }
+  .choice-btn:hover{border-color:var(--blue);}
+  .choice-btn:active{transform:scale(.95);}
+
+  .action-row{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+  .tama-btn{background:var(--green);color:var(--white);font-weight:800;font-size:16px;padding:14px 26px;border-radius:14px;}
+  .mali-btn{background:var(--coral);color:var(--white);font-weight:800;font-size:16px;padding:14px 26px;border-radius:14px;}
+  .mic-btn{
+    width:64px;height:64px;border-radius:50%;background:var(--navy-900);color:var(--white);font-size:24px;
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);
+  }
+  .mic-btn.listening{background:var(--coral);animation:pulse 1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,113,74,.5);}70%{box-shadow:0 0 0 14px rgba(232,113,74,0);}100%{box-shadow:0 0 0 0 rgba(232,113,74,0);}}
+  .override-link{margin-top:10px;font-size:12px;font-weight:700;color:#9a8f72;text-decoration:underline;background:none;}
+  .feedback-msg{min-height:22px;font-weight:800;font-size:14px;color:var(--navy-700);}
+
+  /* ---------- SUMMARY / FINAL ---------- */
+  .summary-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 26px;text-align:center;margin:auto;max-width:440px;}
+  .summary-card .big-score{font-family:'Outfit',sans-serif;font-weight:800;font-size:54px;color:var(--navy-900);margin:8px 0;}
+  .summary-card .verdict{font-size:18px;font-weight:800;margin-bottom:6px;}
+  .verdict.pass{color:var(--green);}
+  .verdict.repeat{color:var(--coral);}
+  .stars{font-size:30px;margin:10px 0;}
+
+  .final-card{background:linear-gradient(160deg, var(--navy-900), var(--navy-700));border-radius:28px;box-shadow:var(--shadow);
+    padding:36px 24px;text-align:center;margin:auto;max-width:480px;color:var(--white);}
+  .final-card h2{font-size:24px;color:var(--gold-300);}
+  .final-card .name{font-size:20px;font-weight:800;margin:10px 0 4px;}
+  .final-card .sub{font-size:13px;opacity:.85;font-weight:700;}
+  .ribbon{font-size:50px;margin-bottom:8px;}
+
+  .footer{text-align:center;font-size:11px;color:rgba(255,255,255,0.55);font-weight:700;padding:10px 0;}
+  .footer span{color:var(--gold-300);}
+
+  #confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50;}
+  .confetti-piece{position:absolute;top:-20px;width:9px;height:14px;opacity:.95;border-radius:2px;}
+
+  @media (max-width:420px){
+    .number-display{font-size:74px;}
+    .choice-btn{font-size:22px;min-width:64px;padding:14px;}
+    .hero h1{font-size:34px;}
+    .brand{font-size:11px;}
+    .pill-toggle button{padding:6px 9px;font-size:11px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .mascot.happy, .mascot.sad, .mic-btn.listening{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="confetti-layer"></div>
+
+<div class="brandbar">
+  <div class="brandbar-inner">
+    <div class="brand"><span class="dot"></span> PROJECT KABULIG</div>
+    <div class="pill-toggle" id="langToggle">
+      <button data-lang="fil-PH" class="active">Filipino</button>
+      <button data-lang="en-PH">English</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ SETUP SCREEN ============ -->
+  <section class="screen active" id="screen-setup">
+    <div class="hero">
+      <h1>Bilang <span>Champs</span></h1>
+      <p>Counting Adventure • Grade 1 to 3</p>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label for="inpSchool">Paaralan (School)</label>
+        <input type="text" id="inpSchool" placeholder="hal. Romblon Central Elementary School" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="inpDistrict">Distrito (District)</label>
+        <select id="inpDistrict">
+          <option value="">— Piliin ang Distrito —</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Antas (Grade Level)</label>
+        <div class="grade-row" id="gradeRow"></div>
+      </div>
+
+      <div class="field">
+        <label>Paano Maglaro</label>
+        <div class="howto-card">
+          <div class="howto-row"><span class="howto-num">1</span> Basahin ang bilang (1–20) — <strong>Guro</strong> o <strong>App</strong> mode, mapapalitan kahit kailan gamit ang toggle sa itaas.</div>
+          <div class="howto-row"><span class="howto-num">2</span> Hanapin ang nawawalang bilang sa sunod-sunod na bilang — pindot o sabihin ang sagot.</div>
+          <div class="howto-row"><span class="howto-num">3</span> Sagutin kung ano ang bago o kasunod ng bilang — pindot o sabihin ang sagot.</div>
+          <div class="howto-row howto-pass">⭐ 8 sa 10 tama para sa susunod na round. Mas mababa, uulitin lang.</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnStart">Simulan ang Laro 🚀</button>
+    </div>
+  </section>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <section class="screen" id="screen-game">
+    <div class="game-header">
+      <div class="round-label">
+        <span class="round-badge" id="roundBadge">Round 1</span>
+        <span class="score-badge" id="scoreBadge">Tama: 0/10</span>
+      </div>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="stage">
+      <svg class="mascot" id="mascot" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g id="mascotGroup">
+          <path d="M50 4 L61 36 L96 36 L67 56 L78 90 L50 70 L22 90 L33 56 L4 36 L39 36 Z" fill="#E3A83B" stroke="#15315C" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="40" cy="48" r="4.5" fill="#15315C" id="eyeL"/>
+          <circle cx="60" cy="48" r="4.5" fill="#15315C" id="eyeR"/>
+          <path id="mouth" d="M40 60 Q50 68 60 60" stroke="#15315C" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
+
+      <div class="question-card">
+        <span class="round-tag" id="roundTag">ROUND 1</span>
+        <div id="questionArea"></div>
+        <div class="feedback-msg" id="feedbackMsg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAGE SUMMARY ============ -->
+  <section class="screen" id="screen-summary">
+    <div class="summary-card">
+      <div class="stars" id="summaryStars">⭐⭐⭐</div>
+      <h2>Tapos na ang Round!</h2>
+      <div class="big-score" id="summaryScore">8/10</div>
+      <div class="verdict pass" id="summaryVerdict">Magaling! Tuloy tayo!</div>
+      <button class="btn-primary" id="btnSummaryNext" style="margin-top:14px;">Magpatuloy</button>
+    </div>
+  </section>
+
+  <!-- ============ FINAL SCREEN ============ -->
+  <section class="screen" id="screen-final">
+    <div class="final-card">
+      <div class="ribbon">🏆</div>
+      <h2>Bilang Champion!</h2>
+      <div class="name" id="finalName">Paaralan</div>
+      <div class="sub">Natapos ang Grade 1 Counting Adventure (1–20)</div>
+      <button class="btn-primary" id="btnRestart" style="margin-top:20px;background:var(--gold-500);color:var(--navy-900);">Maglaro Ulit</button>
+    </div>
+  </section>
+
+  <div class="footer">Project KABULIG • AI-Assisted, Not AI-Generated • <span>Developed by Sir Dyon</span></div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+============================================================ */
+const CONFIG = {
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyhxRljnlqVwyHONB32xROcdusGcvcffuKqjsPrZm57bjfIcsuKdWu1QsSEGvo4gSaJvA/exec",
+  DISTRICTS: [
+    "Alcantara","Banton","Corcuera","Concepcion","Looc","San Fernando",
+    "Cajidiocan-Magdiwang","Romblon","San Andres","Odiongan North",
+    "Odiongan South","San Agustin-Santa Maria-Calatrava","San Jose-Santa Fe"
+  ],
+  GRADES_LIST: [
+    {id:1, label:"Grade 1", max:20},
+    {id:2, label:"Grade 2", max:50},
+    {id:3, label:"Grade 3", max:100}
+  ]
+};
+
+function getGradeMax(){
+  const g = CONFIG.GRADES_LIST.find(g=>g.id===state.grade);
+  return g ? g.max : 20;
+}
+
+// Base words 1-20 (may mga irregular na anyo sa Filipino, kaya hardcoded)
+const NUM_WORDS = {
+  1:{fil:"isa",en:"one"},2:{fil:"dalawa",en:"two"},3:{fil:"tatlo",en:"three"},
+  4:{fil:"apat",en:"four"},5:{fil:"lima",en:"five"},6:{fil:"anim",en:"six"},
+  7:{fil:"pito",en:"seven"},8:{fil:"walo",en:"eight"},9:{fil:"siyam",en:"nine"},
+  10:{fil:"sampu",en:"ten"},11:{fil:"labingisa",en:"eleven"},12:{fil:"labindalawa",en:"twelve"},
+  13:{fil:"labintatlo",en:"thirteen"},14:{fil:"labingapat",en:"fourteen"},15:{fil:"labinlima",en:"fifteen"},
+  16:{fil:"labinganim",en:"sixteen"},17:{fil:"labimpito",en:"seventeen"},18:{fil:"labingwalo",en:"eighteen"},
+  19:{fil:"labinsiyam",en:"nineteen"},20:{fil:"dalawampu",en:"twenty"}
+};
+
+// Tens words para sa 21-100 (Grade 2 & 3)
+const TENS_FIL = {20:"dalawampu",30:"tatlumpu",40:"apatnapu",50:"limampu",60:"animnapu",70:"pitumpu",80:"walumpu",90:"siyamnapu"};
+const TENS_EN  = {20:"twenty",30:"thirty",40:"forty",50:"fifty",60:"sixty",70:"seventy",80:"eighty",90:"ninety"};
+
+// Kumukuha ng salita (Filipino/English) ng kahit anong numero 1-100, ginagamit sa speech matching
+function getNumberWords(n){
+  if(n<=20) return NUM_WORDS[n];
+  if(n===100) return {fil:"isangdaan", en:"onehundred"};
+  const tens = Math.floor(n/10)*10;
+  const ones = n%10;
+  if(ones===0) return {fil:TENS_FIL[tens], en:TENS_EN[tens]};
+  return {
+    fil: TENS_FIL[tens]+"t"+NUM_WORDS[ones].fil, // "dalawampu't isa" -> normalized walang space/tuldok
+    en: TENS_EN[tens]+"-"+NUM_WORDS[ones].en
+  };
+}
+
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  school:"", district:"", mode:"teacher", lang:"fil-PH", grade:1,
+  round:1, stageIndex:0, currentSet:[], currentIndex:0, correctCount:0,
+  awaitingRetry:false
+};
+
+/* ============================================================
+   INIT / SETUP SCREEN
+============================================================ */
+function initSetup(){
+  const sel = document.getElementById('inpDistrict');
+  CONFIG.DISTRICTS.forEach(d=>{
+    const opt=document.createElement('option'); opt.value=d; opt.textContent=d; sel.appendChild(opt);
+  });
+
+  const gradeRow = document.getElementById('gradeRow');
+  CONFIG.GRADES_LIST.forEach(g=>{
+    const div=document.createElement('div');
+    div.className='grade-pill'+(g.id===state.grade?' selected':'');
+    div.dataset.grade=g.id;
+    div.innerHTML=g.label+'<small>1–'+g.max+'</small>';
+    div.addEventListener('click',()=>{
+      state.grade = g.id;
+      document.querySelectorAll('.grade-pill').forEach(p=>p.classList.remove('selected'));
+      div.classList.add('selected');
+    });
+    gradeRow.appendChild(div);
+  });
+
+  document.querySelectorAll('#langToggle button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#langToggle button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      state.lang = btn.dataset.lang;
+    });
+  });
+
+  document.getElementById('btnStart').addEventListener('click', startGame);
+  document.getElementById('btnSummaryNext').addEventListener('click', onSummaryNext);
+  document.getElementById('btnRestart').addEventListener('click', ()=>location.reload());
+}
+
+function startGame(){
+  const school = document.getElementById('inpSchool').value.trim();
+  const district = document.getElementById('inpDistrict').value;
+  if(!school || !district){
+    alert("Pakikumpleto muna ang Paaralan at Distrito.");
+    return;
+  }
+  state.school=school; state.district=district;
+  state.round=1; state.stageIndex=0;
+  showScreen('screen-game');
+  startStage();
+}
+
+/* ============================================================
+   SCREEN SWITCHING
+============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ============================================================
+   STAGE / QUESTION GENERATION
+============================================================ */
+function startStage(){
+  state.currentIndex=0; state.correctCount=0; state.awaitingRetry=false;
+
+  if(state.round===1){
+    const max = getGradeMax();
+    const startNum = state.stageIndex*10 + 1;
+    const endNum = Math.min(startNum+9, max);
+    const nums = range(startNum, endNum);
+    state.currentSet = nums.map(n=>({type:'read', number:n}));
+  } else if(state.round===2){
+    state.currentSet = Array.from({length:10}, ()=>genMissingNumberQuestion());
+  } else if(state.round===3){
+    state.currentSet = Array.from({length:10}, ()=>genBeforeAfterQuestion());
+  }
+
+  updateHeader();
+  renderDots();
+  renderQuestion();
+}
+
+function totalRound1Stages(){
+  return Math.ceil(getGradeMax()/10);
+}
+
+function range(a,b){const out=[];for(let i=a;i<=b;i++)out.push(i);return out;}
+
+function genMissingNumberQuestion(){
+  const max = getGradeMax();
+  const start = 1 + Math.floor(Math.random()*(max-3)); // window of 4 dapat magkasya sa 1..max
+  const seq = [start,start+1,start+2,start+3];
+  const blankPos = Math.floor(Math.random()*4);
+  const answer = seq[blankPos];
+  return {type:'missing', seq, blankPos, answer, choices: makeChoices(answer)};
+}
+
+function genBeforeAfterQuestion(){
+  const max = getGradeMax();
+  const n = 2 + Math.floor(Math.random()*(max-2)); // 2..(max-1) para valid lagi ang before/after
+  const direction = Math.random()<0.5 ? 'before' : 'after';
+  const answer = direction==='before' ? n-1 : n+1;
+  const promptText = direction==='before'
+    ? `Ano ang <u>nauuna</u> kay ${n}?`
+    : `Ano ang <u>sumusunod</u> kay ${n}?`;
+  return {type:'beforeafter', n, direction, answer, promptText, choices: makeChoices(answer)};
+}
+
+function makeChoices(answer){
+  const max = getGradeMax();
+  const set = new Set([answer]);
+  const deltas=[-2,-1,1,2,3,-3];
+  let i=0;
+  while(set.size<3 && i<deltas.length){
+    const cand = answer+deltas[i];
+    if(cand>=1 && cand<=max) set.add(cand);
+    i++;
+  }
+  while(set.size<3){
+    const cand = 1+Math.floor(Math.random()*max);
+    set.add(cand);
+  }
+  return shuffle(Array.from(set));
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ============================================================
+   HEADER / DOTS
+============================================================ */
+function updateHeader(){
+  let round1Label = "Round 1 • Bilang";
+  if(state.round===1){
+    const max = getGradeMax();
+    const startNum = state.stageIndex*10+1;
+    const endNum = Math.min(startNum+9, max);
+    round1Label = `Round 1 • Bilang ${startNum}–${endNum}`;
+  }
+  const labels = {
+    1: round1Label,
+    2: "Round 2 • Nawawalang Bilang",
+    3: "Round 3 • Bago o Kasunod"
+  };
+  document.getElementById('roundBadge').textContent = labels[state.round];
+  document.getElementById('roundTag').textContent = "ROUND "+state.round;
+  document.getElementById('scoreBadge').textContent = `Tama: ${state.correctCount}/10`;
+}
+
+function renderDots(){
+  const dotsEl = document.getElementById('dots');
+  dotsEl.innerHTML="";
+  for(let i=0;i<10;i++){
+    const d=document.createElement('div');
+    d.className='dot-item'+(i===0?' current':'');
+    d.id='dot-'+i;
+    dotsEl.appendChild(d);
+  }
+}
+
+function markDot(index, correct){
+  const d = document.getElementById('dot-'+index);
+  d.classList.remove('current');
+  d.classList.add(correct?'correct':'wrong');
+  const next = document.getElementById('dot-'+(index+1));
+  if(next) next.classList.add('current');
+}
+
+/* ============================================================
+   RENDER QUESTION
+============================================================ */
+function renderQuestion(){
+  const q = state.currentSet[state.currentIndex];
+  const area = document.getElementById('questionArea');
+  document.getElementById('feedbackMsg').textContent="";
+  setMascot('neutral');
+
+  if(q.type==='read'){
+    area.innerHTML = `
+      <div class="pill-toggle-light" id="inlineModeToggle">
+        <button data-mode="teacher" class="${state.mode==='teacher'?'active':''}">🧑‍🏫 Guro</button>
+        <button data-mode="app" class="${state.mode==='app'?'active':''}">🎙️ App</button>
+      </div>
+      <div class="prompt-text">Basahin ang bilang:</div>
+      <div class="number-display">${q.number}</div>
+      ${state.mode==='teacher' ? `
+        <div class="action-row">
+          <button class="tama-btn" id="btnTama">✓ Tama</button>
+          <button class="mali-btn" id="btnMali">✗ Mali</button>
+        </div>
+      ` : `
+        <div class="action-row">
+          <button class="mic-btn" id="btnMic">🎙️</button>
+        </div>
+        <button class="override-link" id="btnOverride">Hindi nagana ang mic? Markahan nang manu-mano</button>
+      `}
+    `;
+    document.querySelectorAll('#inlineModeToggle button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        state.mode = btn.dataset.mode;
+        renderQuestion(); // i-refresh ang activity gamit ang bagong mode, walang mawawalang score
+      });
+    });
+    if(state.mode==='teacher'){
+      document.getElementById('btnTama').addEventListener('click',()=>answerCorrect());
+      document.getElementById('btnMali').addEventListener('click',()=>answerIncorrect());
+    } else {
+      document.getElementById('btnMic').addEventListener('click',()=>listenForNumber(q.number));
+      document.getElementById('btnOverride').addEventListener('click',()=>showTeacherOverride());
+    }
+  }
+
+  if(q.type==='missing'){
+    const seqHtml = q.seq.map((n,i)=> i===q.blankPos
+      ? `<span class="seq-num blank">?</span>`
+      : `<span class="seq-num">${n}</span>`
+    ).join("");
+    area.innerHTML = `
+      <div class="prompt-text">Anong bilang ang nawawala?</div>
+      <div class="seq-display">${seqHtml}</div>
+      <div class="choices" id="choicesArea">
+        ${q.choices.map(c=>`<button class="choice-btn" data-val="${c}">${c}</button>`).join("")}
+      </div>
+      <div class="action-row"><button class="mic-btn" id="btnMic">🎙️</button></div>
+    `;
+    bindChoiceButtons(q.answer);
+    document.getElementById('btnMic').addEventListener('click',()=>listenForNumber(q.answer));
+  }
+
+  if(q.type==='beforeafter'){
+    area.innerHTML = `
+      <div class="prompt-text">${q.promptText}</div>
+      <div class="number-display" style="font-size:64px;">${q.n}</div>
+      <div class="choices" id="choicesArea">
+        ${q.choices.map(c=>`<button class="choice-btn" data-val="${c}">${c}</button>`).join("")}
+      </div>
+      <div class="action-row"><button class="mic-btn" id="btnMic">🎙️</button></div>
+    `;
+    bindChoiceButtons(q.answer);
+    document.getElementById('btnMic').addEventListener('click',()=>listenForNumber(q.answer));
+  }
+}
+
+function bindChoiceButtons(answer){
+  document.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const val = parseInt(btn.dataset.val,10);
+      if(val===answer) answerCorrect(); else answerIncorrect();
+    });
+  });
+}
+
+function showTeacherOverride(){
+  const ok = confirm("Markahan bilang TAMA?");
+  if(ok) answerCorrect(); else answerIncorrect();
+}
+
+/* ============================================================
+   ANSWER HANDLING
+============================================================ */
+function answerCorrect(){
+  state.correctCount++;
+  markDot(state.currentIndex, true);
+  setMascot('happy');
+  fireConfetti();
+  playChime();
+  document.getElementById('feedbackMsg').textContent = pick(["Tama! Galing!","Husay!","Magaling!","Tama ka!"]);
+  document.getElementById('scoreBadge').textContent = `Tama: ${state.correctCount}/10`;
+  setTimeout(nextQuestion, 900);
+}
+
+function answerIncorrect(){
+  markDot(state.currentIndex, false);
+  setMascot('sad');
+  playSoft();
+  document.getElementById('feedbackMsg').textContent = pick(["Subukan ulit sa susunod!","Halos tama, ulitin natin!","Okay lang, tuloy lang!"]);
+  setTimeout(nextQuestion, 1100);
+}
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function nextQuestion(){
+  state.currentIndex++;
+  if(state.currentIndex<10){
+    renderQuestion();
+  } else {
+    endStage();
+  }
+}
+
+/* ============================================================
+   MASCOT
+============================================================ */
+function setMascot(mood){
+  const m = document.getElementById('mascot');
+  const mouth = document.getElementById('mouth');
+  m.classList.remove('happy','sad');
+  if(mood==='happy'){ m.classList.add('happy'); mouth.setAttribute('d','M38 58 Q50 74 62 58'); }
+  else if(mood==='sad'){ m.classList.add('sad'); mouth.setAttribute('d','M40 64 Q50 56 60 64'); }
+  else { mouth.setAttribute('d','M40 60 Q50 68 60 60'); }
+}
+
+/* ============================================================
+   STAGE END / SUMMARY
+============================================================ */
+function endStage(){
+  const pass = state.correctCount>=8;
+  logAttempt(pass);
+
+  document.getElementById('summaryScore').textContent = `${state.correctCount}/10`;
+  document.getElementById('summaryStars').textContent = pass ? "⭐⭐⭐" : "⭐";
+  const verdictEl = document.getElementById('summaryVerdict');
+  if(pass){
+    verdictEl.textContent = "Magaling! Tuloy tayo!";
+    verdictEl.className = "verdict pass";
+    document.getElementById('btnSummaryNext').textContent = isLastStage() ? "Tapusin ang Laro 🏆" : "Magpatuloy ➜";
+  } else {
+    verdictEl.textContent = "Halos tama! Ulitin natin.";
+    verdictEl.className = "verdict repeat";
+    document.getElementById('btnSummaryNext').textContent = "Subukan Ulit 🔁";
+  }
+  state.stagePassed = pass;
+  showScreen('screen-summary');
+}
+
+function isLastStage(){
+  return state.round===3;
+}
+
+function onSummaryNext(){
+  if(state.stagePassed){
+    advanceStage();
+  } else {
+    startStage(); // regenerate / retry same stage
+    showScreen('screen-game');
+  }
+}
+
+function advanceStage(){
+  if(state.round===1 && state.stageIndex < totalRound1Stages()-1){
+    state.stageIndex++;
+    startStage();
+    showScreen('screen-game');
+  } else if(state.round===1){
+    state.round=2; state.stageIndex=0;
+    startStage();
+    showScreen('screen-game');
+  } else if(state.round===2){
+    state.round=3; state.stageIndex=0;
+    startStage();
+    showScreen('screen-game');
+  } else if(state.round===3){
+    document.getElementById('finalName').textContent = state.school;
+    document.querySelector('#screen-final .sub').textContent =
+      `Natapos ang Grade ${state.grade} Counting Adventure (1–${getGradeMax()})`;
+    showScreen('screen-final');
+  }
+}
+
+/* ============================================================
+   SPEECH RECOGNITION
+============================================================ */
+function getRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const rec = new SR();
+  rec.lang = state.lang;
+  rec.interimResults = false;
+  rec.maxAlternatives = 3;
+  return rec;
+}
+
+function listenForNumber(expected){
+  const rec = getRecognition();
+  const micBtn = document.getElementById('btnMic');
+  if(!rec){
+    alert("Hindi suportado ng browser na ito ang speech recognition. Gamitin ang Chrome, o gamitin ang Guro Mode.");
+    return;
+  }
+  micBtn.classList.add('listening');
+  document.getElementById('feedbackMsg').textContent = "Nakikinig...";
+
+  rec.onresult = (e)=>{
+    const transcript = e.results[0][0].transcript;
+    micBtn.classList.remove('listening');
+    if(matchesNumber(transcript, expected)){
+      answerCorrect();
+    } else {
+      document.getElementById('feedbackMsg').textContent = `Narinig: "${transcript}". Subukan ulit?`;
+    }
+  };
+  rec.onerror = ()=>{
+    micBtn.classList.remove('listening');
+    document.getElementById('feedbackMsg').textContent = "Walang narinig. Subukan ulit o gamitin ang manu-manong pagmarka.";
+  };
+  rec.onend = ()=>{ micBtn.classList.remove('listening'); };
+  rec.start();
+}
+
+function normalize(str){
+  return str.toLowerCase().replace(/[-\s]/g,'').trim();
+}
+
+function matchesNumber(transcript, number){
+  const norm = normalize(transcript);
+  const words = getNumberWords(number);
+  if(!words) return false;
+  if(norm.includes(String(number))) return true;
+  if(norm.includes(normalize(words.fil))) return true;
+  if(norm.includes(normalize(words.en))) return true;
+  return false;
+}
+
+/* ============================================================
+   CONFETTI + SOUND
+============================================================ */
+function fireConfetti(){
+  const layer = document.getElementById('confetti-layer');
+  const colors = ['#E3A83B','#3FAE7E','#3A98C9','#E8714A','#F4D58D'];
+  for(let i=0;i<26;i++){
+    const piece = document.createElement('div');
+    piece.className='confetti-piece';
+    piece.style.left = Math.random()*100+'vw';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    const duration = 1.4 + Math.random()*1.1;
+    piece.style.animation = `confettiFall ${duration}s ease-in forwards`;
+    layer.appendChild(piece);
+    setTimeout(()=>piece.remove(), duration*1000+100);
+  }
+}
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+@keyframes confettiFall{
+  0%{ top:-20px; opacity:1; }
+  100%{ top:100vh; opacity:0.2; transform: translateY(0) rotate(540deg); }
+}`;
+document.head.appendChild(styleSheet);
+
+let audioCtx;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, start, dur, vol){
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.value = freq;
+  osc.type='sine';
+  gain.gain.setValueAtTime(0, ctx.currentTime+start);
+  gain.gain.linearRampToValueAtTime(vol, ctx.currentTime+start+0.02);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime+start+dur);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(ctx.currentTime+start);
+  osc.stop(ctx.currentTime+start+dur+0.05);
+}
+function playChime(){
+  try{
+    playTone(523.25,0,0.16,0.18);
+    playTone(659.25,0.12,0.16,0.18);
+    playTone(783.99,0.24,0.22,0.2);
+  }catch(e){}
+}
+function playSoft(){
+  try{ playTone(330,0,0.22,0.1); }catch(e){}
+}
+
+/* ============================================================
+   GOOGLE SHEETS LOGGING
+============================================================ */
+function logAttempt(pass){
+  let stageLabel = "Set";
+  if(state.round===1){
+    const max = getGradeMax();
+    const startNum = state.stageIndex*10+1;
+    const endNum = Math.min(startNum+9, max);
+    stageLabel = `${startNum}-${endNum}`;
+  }
+  const payload = {
+    timestamp: new Date().toISOString(),
+    school: state.school,
+    district: state.district,
+    grade: "Grade "+state.grade,
+    mode: state.mode,
+    round: state.round,
+    stage: stageLabel,
+    score: state.correctCount,
+    total: 10,
+    status: pass ? "PASS" : "REPEAT"
+  };
+  if(!CONFIG.SCRIPT_URL || CONFIG.SCRIPT_URL.includes("PASTE_YOUR")) return;
+  fetch(CONFIG.SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(payload)
+  }).catch(()=>{ /* silent fail if offline */ });
+}
+
+/* ============================================================
+   BOOT
+============================================================ */
+initSetup();
+</script>
+</body>
+</html>
