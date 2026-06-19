@@ -61,6 +61,11 @@
     border-bottom:1px solid rgba(244,213,141,0.18);
   }
   .brandbar-inner{max-width:760px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand-group{display:flex;align-items:center;gap:10px;}
+  .home-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.1);
+    border:1px solid rgba(244,213,141,0.3);color:var(--gold-300);font-size:15px;
+    display:flex;align-items:center;justify-content:center;}
+  .home-btn:hover{background:rgba(244,213,141,0.2);}
   .brand{display:flex;align-items:center;gap:8px;font-family:'Outfit',sans-serif;font-weight:800;color:var(--white);font-size:14px;letter-spacing:.3px;}
   .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--gold-500);display:inline-block;}
   .control-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
@@ -193,7 +198,10 @@
 
 <div class="brandbar">
   <div class="brandbar-inner">
-    <div class="brand"><span class="dot"></span> PROJECT KABULIG</div>
+    <div class="brand-group">
+      <button class="home-btn" id="btnHome" style="display:none;" title="Bumalik sa Home" aria-label="Home">🏠</button>
+      <div class="brand"><span class="dot"></span> PROJECT KABULIG</div>
+    </div>
     <div class="pill-toggle" id="langToggle">
       <button data-lang="fil-PH" class="active">Filipino</button>
       <button data-lang="en-PH">English</button>
@@ -240,6 +248,17 @@
     </div>
   </section>
 
+  <!-- ============ HOME SCREEN (kapag pinindot ang home icon) ============ -->
+  <section class="screen" id="screen-homehub">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:40px;margin-bottom:6px;">👋</div>
+      <h2 style="color:var(--navy-900);font-size:20px;">Kumusta!</h2>
+      <p id="homeRecap" style="color:var(--navy-700);font-weight:700;font-size:14px;margin-top:6px;"></p>
+      <button class="btn-primary" id="btnResume" style="margin-top:18px;">▶️ Magpatuloy sa Laro</button>
+      <button class="btn-primary" id="btnNewPlayer" style="margin-top:10px;background:transparent;color:var(--navy-700);border:2px solid #E3DCC9;">🔄 Bagong Player</button>
+    </div>
+  </section>
+
   <!-- ============ GAME SCREEN ============ -->
   <section class="screen" id="screen-game">
     <div class="game-header">
@@ -276,6 +295,7 @@
       <div class="big-score" id="summaryScore">8/10</div>
       <div class="verdict pass" id="summaryVerdict">Magaling! Tuloy tayo!</div>
       <button class="btn-primary" id="btnSummaryNext" style="margin-top:14px;">Magpatuloy</button>
+      <button class="btn-primary" id="btnSummaryHome" style="margin-top:10px;background:transparent;color:var(--navy-700);border:2px solid #E3DCC9;">🏠 Bumalik sa Home</button>
     </div>
   </section>
 
@@ -350,7 +370,7 @@ function getNumberWords(n){
 const state = {
   school:"", district:"", mode:"teacher", lang:"fil-PH", grade:1,
   round:1, stageIndex:0, currentSet:[], currentIndex:0, correctCount:0,
-  awaitingRetry:false
+  awaitingRetry:false, lastScreen:"screen-game"
 };
 
 /* ============================================================
@@ -387,6 +407,10 @@ function initSetup(){
   document.getElementById('btnStart').addEventListener('click', startGame);
   document.getElementById('btnSummaryNext').addEventListener('click', onSummaryNext);
   document.getElementById('btnRestart').addEventListener('click', ()=>location.reload());
+  document.getElementById('btnHome').addEventListener('click', goHome);
+  document.getElementById('btnSummaryHome').addEventListener('click', goHome);
+  document.getElementById('btnResume').addEventListener('click', ()=>showScreen(state.lastScreen||'screen-game'));
+  document.getElementById('btnNewPlayer').addEventListener('click', resetForNewPlayer);
 }
 
 function startGame(){
@@ -398,8 +422,28 @@ function startGame(){
   }
   state.school=school; state.district=district;
   state.round=1; state.stageIndex=0;
+  logSession(); // i-log lang ng minsan kapag bagong player ang nag-start
+  document.getElementById('btnHome').style.display='flex';
   showScreen('screen-game');
   startStage();
+}
+
+function goHome(){
+  document.getElementById('homeRecap').textContent =
+    `${state.school} • ${state.district} • Grade ${state.grade} • ${state.mode==='teacher'?'Guro Mode':'App Mode'}`;
+  showScreen('screen-homehub');
+}
+
+function resetForNewPlayer(){
+  state.school=""; state.district=""; state.grade=1; state.mode="teacher";
+  state.round=1; state.stageIndex=0; state.currentSet=[]; state.currentIndex=0; state.correctCount=0;
+  document.getElementById('inpSchool').value="";
+  document.getElementById('inpDistrict').value="";
+  document.querySelectorAll('.grade-pill').forEach(p=>p.classList.remove('selected'));
+  const firstPill = document.querySelector('.grade-pill[data-grade="1"]');
+  if(firstPill) firstPill.classList.add('selected');
+  document.getElementById('btnHome').style.display='none';
+  showScreen('screen-setup');
 }
 
 /* ============================================================
@@ -408,6 +452,9 @@ function startGame(){
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==='screen-game' || id==='screen-summary'){
+    state.lastScreen = id;
+  }
 }
 
 /* ============================================================
@@ -663,7 +710,6 @@ function setMascot(mood){
 ============================================================ */
 function endStage(){
   const pass = state.correctCount>=8;
-  logAttempt(pass);
 
   document.getElementById('summaryScore').textContent = `${state.correctCount}/10`;
   document.getElementById('summaryStars').textContent = pass ? "⭐⭐⭐" : "⭐";
@@ -827,25 +873,13 @@ function playSoft(){
 /* ============================================================
    GOOGLE SHEETS LOGGING
 ============================================================ */
-function logAttempt(pass){
-  let stageLabel = "Set";
-  if(state.round===1){
-    const max = getGradeMax();
-    const startNum = state.stageIndex*10+1;
-    const endNum = Math.min(startNum+9, max);
-    stageLabel = `${startNum}-${endNum}`;
-  }
+function logSession(){
   const payload = {
     timestamp: new Date().toISOString(),
     school: state.school,
     district: state.district,
     grade: "Grade "+state.grade,
-    mode: state.mode,
-    round: state.round,
-    stage: stageLabel,
-    score: state.correctCount,
-    total: 10,
-    status: pass ? "PASS" : "REPEAT"
+    mode: state.mode==='teacher' ? "Guro Mode" : "App Mode"
   };
   if(!CONFIG.SCRIPT_URL || CONFIG.SCRIPT_URL.includes("PASTE_YOUR")) return;
   fetch(CONFIG.SCRIPT_URL, {
